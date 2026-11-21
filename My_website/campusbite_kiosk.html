@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cavite State UniMall - University Food &amp; Stalls Directory</title>
+</head>
+<body>
+
+    <!-- ===================== HEADER & CONNECTION STATUS ===================== -->
+    <header>
+        <h1>Cavite State UniMall - University Food &amp; Stalls Directory</h1>
+        <p>
+            <strong>Connection Status:</strong> [ONLINE - Live Menu Synced] |
+            (Offline Mode Ready: Cached menus and stall locations remain viewable without Wi-Fi)
+        </p>
+
+        <nav>
+            <ul>
+                <li><a href="#student-kiosk">Student Kiosk Menu</a></li>
+                <li><a href="#campus-map">Campus Zone Map</a></li>
+                <li><a href="#seller-portal">Seller Account Portal</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <hr>
+
+    <main>
+
+        <!-- ===================== SECTION 1: STUDENT KIOSK ===================== -->
+        <section id="student-kiosk">
+            <h2>Student Kiosk Food Directory</h2>
+
+            <form action="#" method="get">
+                <fieldset>
+                    <legend>Search and Filter Food</legend>
+
+                    <p>
+                        <label for="search-food">Search Food or Store:</label>
+                        <input type="text" id="search-food" name="search-food" placeholder="e.g., Sisig, Siomai">
+                    </p>
+
+                    <p>
+                        <label for="filter-category">Category:</label>
+                        <select id="filter-category" name="filter-category">
+                            <option value="all">All</option>
+                            <option value="rice-meals">Rice Meals</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="drinks">Drinks</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <label for="filter-zone">Campus Zone:</label>
+                        <select id="filter-zone" name="filter-zone">
+                            <option value="all-zones">All Zones</option>
+                            <option value="main-canteen">Main Canteen</option>
+                            <option value="engineering-building">Engineering Building</option>
+                            <option value="gate-1">Gate 1 Stalls</option>
+                            <option value="student-center">Student Center</option>
+                        </select>
+                    </p>
+
+                    <button type="submit">Search</button>
+                    <button type="reset">Clear Filters</button>
+                </fieldset>
+            </form>
+
+            <h3>Today's Menu (6 Items)</h3>
+
+            <!-- Food Item 1 -->
+            <article>
+                <img src="sisig.jpg" alt="Plate of crispy chicken sisig served with rice" width="200" height="150">
+                <h3>Crispy Chicken Sisig w/ Rice</h3>
+                <p><strong>Price:</strong> PHP 75</p>
+                <p><strong>Store:</strong> Ate Glo's Karinderya</p>
+                <p><strong>Location:</strong> Main Canteen - Stall #2</p>
+                <p><strong>Availability:</strong> Available</p>
+                <p><strong>Online Queue Note:</strong> No Line</p>
+                <p><a href="#campus-map">View Stall Location</a></p>
+            </article>
+
+            <hr>
+
+            <!-- Food Item 2 -->
+            <article>
+                <img src="silog.jpg" alt="Pork silog with garlic fried rice and fried egg" width="200" height="150">
+                <h3>Pork Silog</h3>
+                <p><strong>Price:</strong> PHP 65</p>
+                <p><strong>Store:</strong> Kuya Ben's Silogan</p>
+                <p><strong>Location:</strong> Gate 1 Stalls - Stall #4</p>
+                <p><strong>Availability:</strong> Available</p>
+                <p><strong>Online Queue Note:</strong> Busy - Online Only</p>
+                <p><a href="#campus-map">View Stall Location</a></p>
+            </article>
+
+            <hr>
+
+            <!-- Food Item 3 -->
+            <article>
+                <img src="beef_pares.jpg" alt="Bowl of beef pares with garlic rice and soup" width="200" height="150">
+                <h3>Beef Pares</h3>
+                <p><strong>Price:</strong> PHP 85</p>
+                <p><strong>Store:</strong> Ate Glo's Karinderya</p>
+                <p><strong>Location:</strong> Main Canteen - Stall #2</p>
+                <p><strong>Availability:</strong> Sold Out</p>
+                <p><strong>Online Queue Note:</strong> No Line</p>
+                <p><a href="#campus-map">View Stall Location</a></p>
+            </article>
+
+            <hr>
+
+            <!-- Food Item 4 -->
+            <article>
+                <img src="siomai.jpg" alt="Four pieces of cheesy siomai in a paper tray" width="200" height="150">
+                <h3>Cheesy Siomai 4pcs</h3>
+                <p><strong>Price:</strong> PHP 35</p>
+                <p><strong>Store:</strong> Siomai House</p>
+                <p><strong>Location:</strong> Engineering Building - Stall #1</p>
+                <p><strong>Availability:</strong> Available</p>
+                <p><strong>Online Queue Note:</strong> Busy - Online Only</p>
+                <p><a href="#campus-map">View Stall Location</a></p>
+            </article>
+
+            <hr>
+
+            <!-- Food Item 5 -->
+            <article>
+                <img src="iced_coffee.jpg" alt="Cup of iced caramel coffee with a straw" width="200" height="150">
+                <h3>Iced Caramel Coffee</h3>
+                <p><strong>Price:</strong> PHP 55</p>
+                <p><strong>Store:</strong> Student Brews</p>
+                <p><strong>Location:</strong> Student Center - Stall #3</p>
+                <p><strong>Availability:</strong> Available</p>
+                <p><strong>Online Queue Note:</strong> No Line</p>
+                <p><a href="#campus-map">View Stall Location</a></p>
+            </article>
+
+            <hr>
+
+            <!-- Food Item 6 -->
+            <article>
+                <img src="chicken_pastil.jpg" alt="Chicken pastil wrapped in banana leaf with rice" width="200" height="150">
+                <h3>Chicken Pastil</h3>
+                <p><strong>Price:</strong> PHP 50</p>
+                <p><strong>Store:</strong> Kuya Ben's Silogan</p>
+                <p><strong>Location:</strong> Gate 1 Stalls - Stall #4</p>
+                <p><strong>Availability:</strong> Sold Out</p>
+                <p><strong>Online Queue Note:</strong> Busy - Online Only</p>
+                <p><a href="#campus-map">View Stall Location</a></p>
+            </article>
+        </section>
+
+        <hr>
+
+        <!-- ===================== SECTION 2: CAMPUS ZONE LOCATOR ===================== -->
+        <section id="campus-map">
+            <h2>Campus Food Zone Map (No Google Maps Required)</h2>
+
+            <img src="campus_map.png" alt="Custom campus layout diagram showing the Main Canteen, Engineering Wing, Gate 1 Stalls, and Student Center" width="500" height="350">
+
+            <h3>Campus Zone Directory</h3>
+
+            <table border="1" cellpadding="6">
+                <caption>Food Zones, Stores, and Walking Directions</caption>
+                <thead>
+                    <tr>
+                        <th>Campus Zone</th>
+                        <th>Stores Inside</th>
+                        <th>Walking Directions / Landmark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Main Canteen</td>
+                        <td>Ate Glo's Karinderya (Stall #2)</td>
+                        <td>Beside the main flagpole entrance</td>
+                    </tr>
+                    <tr>
+                        <td>Engineering Wing</td>
+                        <td>Siomai House (Stall #1)</td>
+                        <td>Ground floor, near the Engineering Building lobby</td>
+                    </tr>
+                    <tr>
+                        <td>Gate 1 Stalls</td>
+                        <td>Kuya Ben's Silogan (Stall #4)</td>
+                        <td>Right after the Gate 1 guard post, along the left sidewalk</td>
+                    </tr>
+                    <tr>
+                        <td>Student Center</td>
+                        <td>Student Brews (Stall #3)</td>
+                        <td>Beside the student lounge, across the library</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><a href="#student-kiosk">Back to Student Kiosk Menu</a></p>
+        </section>
+
+        <hr>
+
+        <!-- ===================== SECTION 3: SELLER PORTAL ===================== -->
+        <section id="seller-portal">
+            <h2>Seller Account Portal (Karinderya &amp; Student Vendors)</h2>
+
+            <p>
+                Logged in as: Ate Glo's Karinderya (Seller ID: VND-104) |
+                Sync Status: Online (Changes save locally if Offline)
+            </p>
+
+            <form action="#" method="post" enctype="multipart/form-data">
+
+                <fieldset>
+                    <legend>Basic Storefront Customization</legend>
+
+                    <p>
+                        <label for="store-name">Store Name:</label>
+                        <input type="text" id="store-name" name="store-name" value="Ate Glo's Karinderya">
+                    </p>
+
+                    <p>
+                        <label for="store-tagline">Store Tagline:</label>
+                        <input type="text" id="store-tagline" name="store-tagline" placeholder="e.g., Sarap na parang bahay">
+                    </p>
+
+                    <p>
+                        <label for="store-zone">Campus Zone:</label>
+                        <select id="store-zone" name="store-zone">
+                            <option value="main-canteen">Main Canteen</option>
+                            <option value="engineering-building">Engineering Building</option>
+                            <option value="gate-1">Gate 1 Stalls</option>
+                            <option value="student-center">Student Center</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        Operating Status:
+                        <input type="radio" id="status-open" name="operating-status" value="open" checked>
+                        <label for="status-open">Open Now</label>
+
+                        <input type="radio" id="status-closed" name="operating-status" value="closed">
+                        <label for="status-closed">Closed</label>
+                    </p>
+
+                    <p>
+                        <label for="store-theme">Store Theme Color:</label>
+                        <select id="store-theme" name="store-theme">
+                            <option value="red">Red</option>
+                            <option value="blue">Blue</option>
+                            <option value="green">Green</option>
+                            <option value="yellow">Yellow</option>
+                            <option value="orange">Orange</option>
+                        </select>
+                    </p>
+                </fieldset>
+
+                <br>
+
+                <fieldset>
+                    <legend>Add / Update Food Item</legend>
+
+                    <p>
+                        <label for="food-name">Food Name:</label>
+                        <input type="text" id="food-name" name="food-name" placeholder="e.g., Chicken Adobo">
+                    </p>
+
+                    <p>
+                        <label for="food-price">Price (PHP):</label>
+                        <input type="number" id="food-price" name="food-price" min="0" placeholder="e.g., 70">
+                    </p>
+
+                    <p>
+                        <label for="food-category">Category:</label>
+                        <select id="food-category" name="food-category">
+                            <option value="rice-meals">Rice Meals</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="drinks">Drinks</option>
+                        </select>
+                    </p>
+
+                    <p>
+                        <label for="food-photo">Food Photo:</label>
+                        <input type="file" id="food-photo" name="food-photo" accept="image/*">
+                    </p>
+
+                    <p>
+                        <label for="food-availability">Availability:</label>
+                        <select id="food-availability" name="food-availability">
+                            <option value="available">Available</option>
+                            <option value="sold-out">Sold Out</option>
+                        </select>
+                    </p>
+                </fieldset>
+
+                <p>
+                    <button type="submit">Save Changes</button>
+                </p>
+
+            </form>
+        </section>
+
+    </main>
+
+    <hr>
+
+    <footer>
+        <p>CampusBite Kiosk Prototype - HTML Wireframe</p>
+    </footer>
+
+</body>
+</html>
