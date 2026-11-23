@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UMall Connect — University Mall Directory & Live Stock</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            umall: {
+              green: '#064e3b',
+              emerald: '#059669',
+              gold: '#d97706',
+              amber: '#f59e0b',
+              cream: '#fdfbf7',
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-emerald-200 selection:text-emerald-950">
+
+  <!-- ==================== GLOBAL TOAST NOTIFICATION ==================== -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ==================== TOP NAVIGATION BAR ==================== -->
+  <header id="app-header" class="hidden sticky top-0 z-40 bg-emerald-950 text-white shadow-md border-b border-emerald-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <!-- Brand -->
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="handleHeaderBrandClick()">
+        <div class="w-9 h-9 rounded-xl bg-amber-500 text-emerald-950 flex items-center justify-center font-extrabold shadow-sm">
+          <i data-lucide="store" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight leading-none block">UMall <span class="text-amber-400">Connect</span></span>
+          <span class="text-[11px] text-emerald-300/90 font-medium block">University Mall Directory</span>
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Online / Offline Simulator Toggle -->
+        <button
+          id="network-toggle-btn"
+          onclick="toggleNetworkMode()"
+          title="Toggle between Online (Live Stock) and Offline (Directory Only) mode"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border shadow-sm cursor-pointer"
+        >
+          <span id="network-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="network-label">Online</span>
+        </button>
+
+        <!-- Role Badge / Switcher (Visible when logged in & online) -->
+        <button
+          id="switch-role-btn"
+          onclick="goToRoleSelection()"
+          class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 text-xs font-medium border border-emerald-700/70 transition cursor-pointer"
+        >
+          <i data-lucide="repeat" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="current-role-label">Switch Role</span>
+        </button>
+
+        <!-- User Pill & Logout -->
+        <div class="flex items-center gap-2 pl-2 border-l border-emerald-800">
+          <span id="header-username" class="hidden md:inline text-xs font-medium text-emerald-200 max-w-[120px] truncate">Student</span>
+          <button
+            id="logout-btn"
+            onclick="logout()"
+            class="p-2 rounded-xl bg-emerald-900/70 hover:bg-red-600/90 text-emerald-100 hover:text-white transition cursor-pointer"
+            title="Sign Out / Exit"
+          >
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== OFFLINE MODE BANNER ==================== -->
+  <div id="offline-banner" class="hidden bg-amber-500 text-emerald-950 px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-inner">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <i data-lucide="wifi-off" class="w-4 h-4 shrink-0"></i>
+        <span>Offline Mode Active — Showing cached Stall Names, Menus &amp; Locations only. Live stock status is hidden.</span>
+      </div>
+      <button onclick="toggleNetworkMode()" class="underline font-bold hover:text-emerald-900 cursor-pointer">
+        Reconnect Online
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 flex flex-col">
+
+    <!-- 1. LOGIN / SIGN IN VIEW -->
+    <section id="view-login" class="flex-1 flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-900">
+      <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-emerald-100">
+        <!-- Top Banner -->
+        <div class="bg-emerald-900 px-6 py-7 text-white text-center relative overflow-hidden">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500 text-emerald-950 flex items-center justify-center mx-auto mb-3 shadow-lg">
+            <i data-lucide="building-2" class="w-8 h-8"></i>
+          </div>
+          <h1 class="text-2xl font-extrabold tracking-tight">UMall <span class="text-amber-400">Connect</span></h1>
+          <p class="text-emerald-200 text-xs sm:text-sm mt-1">University Mall Stall Directory &amp; Real-Time Availability</p>
+        </div>
+
+        <!-- Form Body -->
+        <div class="p-6 sm:p-8">
+          <!-- Auth Tabs -->
+          <div class="grid grid-cols-2 bg-slate-100 p-1 rounded-xl mb-6 text-xs font-semibold">
+            <button id="tab-signin" onclick="switchAuthTab('signin')" class="py-2 rounded-lg bg-white text-emerald-950 shadow-sm transition cursor-pointer">
+              Sign In
+            </button>
+            <button id="tab-signup" onclick="switchAuthTab('signup')" class="py-2 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer">
+              Create Account
+            </button>
+          </div>
+
+          <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name or Student / Staff ID</label>
+              <div class="relative">
+                <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input
+                  type="text"
+                  id="auth-name"
+                  required
+                  placeholder="e.g., Juan Dela Cruz / 2024-00123"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">University Email</label>
+              <div class="relative">
+                <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input
+                  type="email"
+                  id="auth-email"
+                  required
+                  placeholder="juan.delacruz@university.edu.ph"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600"
+                />
+              </div>
+            </div>
+
+            <div id="auth-password-group">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <div class="relative">
+                <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input
+                  type="password"
+                  id="auth-password"
+                  required
+                  value="umall2026"
+                  placeholder="••••••••"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              id="auth-submit-btn"
+              class="w-full py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Continue to UMall</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <!-- Quick Demo & Offline Access -->
+          <div class="mt-6 pt-5 border-t border-slate-200 space-y-2.5">
+            <button
+              type="button"
+              onclick="quickDemoLogin()"
+              class="w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-semibold text-xs border border-emerald-200 transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <i data-lucide="sparkles" class="w-4 h-4 text-emerald-700"></i>
+              <span>Instant Demo Login (Online)</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="enterOfflineGuestMode()"
+              class="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold text-xs border border-amber-200 transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <i data-lucide="wifi-off" class="w-4 h-4 text-amber-700"></i>
+              <span>Browse Offline (Stall Names, Menus &amp; Locations)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ROLE SELECTION VIEW (SELLER vs CONSUMER) -->
+    <section id="view-role-select" class="hidden flex-1 flex items-center justify-center p-4 sm:p-8">
+      <div class="w-full max-w-3xl">
+        <div class="text-center mb-8">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold mb-3">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+            Welcome, <span id="role-welcome-name">User</span>!
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">How would you like to use UMall?</h2>
+          <p class="text-slate-500 text-sm mt-1.5">Choose your portal below. You can switch roles anytime from the top menu.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Consumer Card -->
+          <div
+            onclick="selectRole('consumer')"
+            class="group bg-white rounded-3xl p-7 border-2 border-slate-200 hover:border-emerald-600 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-800 group-hover:bg-emerald-700 group-hover:text-white flex items-center justify-center mb-5 transition-colors">
+                <i data-lucide="shopping-bag" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-2">Consumer (Student / Visitor)</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-5">
+                Browse all UMall stalls, check menus and services (food, 2nd floor uniforms, printers), search items, and see live green/red availability.
+              </p>
+              <ul class="space-y-2 text-xs text-slate-600 font-medium mb-6">
+                <li class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  Live Green (Available) &amp; Red (Out of Stock) indicators
+                </li>
+                <li class="flex items-center gap-2">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-emerald-700"></i>
+                  Instant search by stall, item, or floor location
+                </li>
+              </ul>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100 text-emerald-800 font-bold text-sm">
+              <span>Enter Consumer Directory</span>
+              <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Seller Card -->
+          <div
+            onclick="selectRole('seller')"
+            class="group bg-white rounded-3xl p-7 border-2 border-slate-200 hover:border-amber-500 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 group-hover:bg-amber-500 group-hover:text-emerald-950 flex items-center justify-center mb-5 transition-colors">
+                <i data-lucide="store" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-2">Seller (Stall Owner / Staff)</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mb-5">
+                Manage your UMall stall inventory—add food items, 2nd floor school uniforms, or printing services, and toggle stock status in real time.
+              </p>
+              <ul class="space-y-2 text-xs text-slate-600 font-medium mb-6">
+                <li class="flex items-center gap-2">
+                  <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-amber-600"></i>
+                  Add or edit products, prices &amp; stall locations
+                </li>
+                <li class="flex items-center gap-2">
+                  <i data-lucide="toggle-right" class="w-3.5 h-3.5 text-amber-600"></i>
+                  One-click toggle: Available vs. Out of Stock
+                </li>
+              </ul>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100 text-amber-700 font-bold text-sm">
+              <span>Open Seller Dashboard</span>
+              <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CONSUMER VIEW (ONLINE & OFFLINE) -->
+    <section id="view-consumer" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- Top Header & Search Controls -->
+      <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">UMall Stalls &amp; Services</h1>
+            <p id="consumer-subtitle" class="text-sm text-slate-500 mt-0.5">
+              Check real-time stock across food stalls, 2nd floor uniforms, and printing shops.
+            </p>
+          </div>
+
+          <!-- Legend (Hidden in Offline Mode) -->
+          <div id="consumer-legend" class="flex flex-wrap items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200/80 text-xs font-semibold">
+            <span class="text-slate-500">Status Legend:</span>
+            <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Available
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-red-700 bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Out of Stock
+            </span>
+          </div>
+        </div>
+
+        <!-- Search & Filter Inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-7 relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+            <input
+              type="text"
+              id="consumer-search"
+              oninput="renderConsumerStalls()"
+              placeholder="Search stall name, uniform, printing, rice meal, 2nd floor..."
+              class="w-full pl-11 pr-10 py-3 rounded-2xl border border-slate-300 bg-slate-50/60 focus:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 transition"
+            />
+            <button
+              id="clear-search-btn"
+              onclick="clearConsumerSearch()"
+              class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+              title="Clear search"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Category / Floor Filter -->
+          <div class="md:col-span-3">
+            <select
+              id="consumer-category-filter"
+              onchange="renderConsumerStalls()"
+              class="w-full py-3 px-4 rounded-2xl border border-slate-300 bg-slate-50/60 focus:bg-white text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+            >
+              <option value="all">All Categories &amp; Floors</option>
+              <option value="Food & Drinks">Food &amp; Drinks</option>
+              <option value="Uniforms & Apparel">Uniforms (2nd Floor)</option>
+              <option value="Printing & Photocopy">Printing &amp; Photocopy</option>
+              <option value="School Supplies">School Supplies</option>
+            </select>
+          </div>
+
+          <!-- Availability Filter (Online Only) -->
+          <div id="availability-filter-wrapper" class="md:col-span-2">
+            <button
+              id="only-available-btn"
+              onclick="toggleOnlyAvailableFilter()"
+              class="w-full h-full py-3 px-4 rounded-2xl border border-slate-300 bg-white hover:bg-emerald-50 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span id="only-available-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+              <span>Available Only</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stalls Grid -->
+      <div id="consumer-stalls-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <!-- Empty Search State -->
+      <div id="consumer-empty-state" class="hidden bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm">
+        <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="search-x" class="w-7 h-7"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">No matching stalls or items found</h3>
+        <p class="text-sm text-slate-500 mt-1 max-w-md mx-auto">Try searching for another keyword like "uniform", "print", "canteen", or reset your filters.</p>
+        <button onclick="clearConsumerSearch()" class="mt-4 px-5 py-2.5 rounded-xl bg-emerald-800 text-white text-xs font-semibold hover:bg-emerald-900 transition cursor-pointer">
+          Reset Search &amp; Filters
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. SELLER DASHBOARD VIEW -->
+    <section id="view-seller" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- Top Stall Selector & New Stall Modal Trigger -->
+      <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Seller Inventory Portal</span>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Manage Your Stall &amp; Stock</h1>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2">
+              <label for="seller-stall-select" class="text-xs font-bold text-slate-600">Active Stall:</label>
+              <select
+                id="seller-stall-select"
+                onchange="handleSellerStallChange()"
+                class="py-2.5 px-3.5 rounded-xl border border-slate-300 bg-slate-50 text-sm font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+              >
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <button
+              onclick="toggleNewStallForm()"
+              class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add New Stall</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Collapsible New Stall Form -->
+        <div id="new-stall-panel" class="hidden mt-5 pt-5 border-t border-slate-200">
+          <form onsubmit="handleAddStall(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Stall Name</label>
+              <input type="text" id="new-stall-name" required placeholder="e.g., 2nd Floor PE Uniforms" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">UMall Location</label>
+              <input type="text" id="new-stall-location" required placeholder="e.g., 2nd Floor - Stall 205" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+              <select id="new-stall-category" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                <option value="Food & Drinks">Food &amp; Drinks</option>
+                <option value="Uniforms & Apparel">Uniforms &amp; Apparel</option>
+                <option value="Printing & Photocopy">Printing &amp; Photocopy</option>
+                <option value="School Supplies">School Supplies</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs cursor-pointer">
+                Create Stall
+              </button>
+              <button type="button" onclick="toggleNewStallForm()" class="py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs cursor-pointer">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Main Seller Grid: Left = Add Product & Stall Info, Right = Product List with Stock Toggles -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column: Stall Info & Add Product Form -->
+        <div class="lg:col-span-4 space-y-6">
+          <!-- Stall Location Card -->
+          <div class="bg-emerald-950 text-white rounded-3xl p-6 shadow-md">
+            <div class="flex items-start justify-between gap-2 mb-3">
+              <span id="seller-stall-category-badge" class="px-2.5 py-1 rounded-full bg-emerald-800 text-emerald-200 text-[11px] font-bold">Category</span>
+              <button onclick="editCurrentStallLocation()" class="text-xs text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit Location
+              </button>
+            </div>
+            <h2 id="seller-stall-title" class="text-xl font-extrabold">Stall Name</h2>
+            <p class="text-emerald-200 text-xs mt-1.5 flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4 text-amber-400 shrink-0"></i>
+              <span id="seller-stall-location-text">Location</span>
+            </p>
+
+            <!-- Inline Location Editor -->
+            <div id="edit-location-box" class="hidden mt-3 pt-3 border-t border-emerald-800 flex gap-2">
+              <input type="text" id="edit-location-input" class="flex-1 px-3 py-1.5 rounded-lg bg-emerald-900 border border-emerald-700 text-xs text-white focus:outline-none" />
+              <button onclick="saveStallLocation()" class="px-3 py-1.5 rounded-lg bg-amber-500 text-emerald-950 font-bold text-xs cursor-pointer">Save</button>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-emerald-800/80 text-center">
+              <div class="bg-emerald-900/70 rounded-2xl p-3">
+                <span id="seller-stat-available" class="block text-xl font-extrabold text-emerald-400">0</span>
+                <span class="text-[11px] text-emerald-200">Available</span>
+              </div>
+              <div class="bg-emerald-900/70 rounded-2xl p-3">
+                <span id="seller-stat-unavailable" class="block text-xl font-extrabold text-red-400">0</span>
+                <span class="text-[11px] text-emerald-200">Out of Stock</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Product / Service Form -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="package-plus" class="w-5 h-5 text-emerald-700"></i>
+              <span>Add Product or Service</span>
+            </h3>
+            <form onsubmit="handleAddProduct(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Item / Service Name</label>
+                <input
+                  type="text"
+                  id="prod-name"
+                  required
+                  placeholder="e.g., College Polo Uniform (Large)"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Price (₱)</label>
+                  <input
+                    type="number"
+                    id="prod-price"
+                    required
+                    min="0"
+                    step="0.5"
+                    placeholder="350"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Initial Stock Status</label>
+                  <select
+                    id="prod-available"
+                    class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 cursor-pointer"
+                  >
+                    <option value="true" class="text-emerald-700">🟢 Available</option>
+                    <option value="false" class="text-red-600">🔴 Out of Stock</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Short Note / Details (Optional)</label>
+                <input
+                  type="text"
+                  id="prod-note"
+                  placeholder="e.g., Sizes S, M, L or Bond paper A4/Long"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="w-full py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Add to Stall Menu</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right Column: Inventory List -->
+        <div class="lg:col-span-8">
+          <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+              <div>
+                <h3 class="text-lg font-extrabold text-slate-900">Stall Menu &amp; Stock Controls</h3>
+                <p class="text-xs text-slate-500">Toggle availability anytime. Consumers immediately see green or red status updates.</p>
+              </div>
+              <button
+                onclick="selectRole('consumer')"
+                class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>Preview Consumer View</span>
+              </button>
+            </div>
+
+            <div id="seller-products-list" class="space-y-3">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
+    UMall Connect • University Mall Stall Inventory &amp; Offline Directory System
+  </footer>
+
+  <!-- ==================== APPLICATION JAVASCRIPT ==================== -->
+  <script>
+    // 1. DEFAULT PRE-POPULATED UMALL STALLS DATA
+    const DEFAULT_STALLS = [
+      {
+        id: 'stall-1',
+        name: '2nd Floor University Uniform & Apparel Shop',
+        location: '2nd Floor — Room 204 (Beside Registrar Stairs)',
+        category: 'Uniforms & Apparel',
+        products: [
+          { id: 'p-101', name: 'College Daily Uniform (Polo / Blouse)', price: 420, note: 'Sizes XS, S, M, L, XL', available: true },
+          { id: 'p-102', name: 'University PE T-Shirt & Jogging Pants Set', price: 550, note: 'Complete set', available: true },
+          { id: 'p-103', name: 'Department Lanyard & ID Holder', price: 85, note: 'All colleges', available: false },
+          { id: 'p-104', name: 'NSTP / ROTC Official Shirt', price: 280, note: 'Medium & Large left', available: true }
+        ]
+      },
+      {
+        id: 'stall-2',
+        name: 'UMall Express Print & Photocopy Hub',
+        location: 'Ground Floor — Wing B (Near Main Entrance)',
+        category: 'Printing & Photocopy',
+        products: [
+          { id: 'p-201', name: 'Black & White Document Printing (Short / A4)', price: 2, note: 'Per page (Laser print)', available: true },
+          { id: 'p-202', name: 'Colored Printing (Charts / Thesis / Photos)', price: 10, note: 'Per page', available: true },
+          { id: 'p-203', name: 'Photocopy / Xerox Service', price: 1.5, note: 'Bulk discount available', available: true },
+          { id: 'p-204', name: 'Ring Binding & Hardbound Thesis', price: 120, note: 'Out of coil rings today', available: false }
+        ]
+      },
+      {
+        id: 'stall-3',
+        name: 'Ate Glo’s UMall Canteen & Rice Meals',
+        location: 'Ground Floor — Food Court Stall #3',
+        category: 'Food & Drinks',
+        products: [
+          { id: 'p-301', name: 'Chicken Adobo with Egg & Rice', price: 65, note: 'Best seller lunch meal', available: true },
+          { id: 'p-302', name: 'Pork Sisig Rice Bowl', price: 75, note: 'Served hot', available: true },
+          { id: 'p-303', name: 'Baked Macaroni & Garlic Bread', price: 55, note: 'Sold out for today', available: false },
+          { id: 'p-304', name: 'Iced Calamansi Juice (16oz)', price: 25, note: 'Freshly squeezed', available: true }
+        ]
+      },
+      {
+        id: 'stall-4',
+        name: 'Campus Drafting & School Supplies Corner',
+        location: '2nd Floor — Main Hallway Stall #12',
+        category: 'School Supplies',
+        products: [
+          { id: 'p-401', name: 'Yellow Pad Paper (80 Leaves)', price: 38, note: 'Standard exam pad', available: true },
+          { id: 'p-402', name: 'Bluebook Exam Booklet', price: 12, note: 'Required for midterms', available: true },
+          { id: 'p-403', name: 'Technical Pen 0.5mm & Tracing Paper', price: 145, note: 'For Engineering/Arki', available: false },
+          { id: 'p-404', name: 'Scientific Calculator Rental / Purchase', price: 480, note: 'Casio compatible', available: true }
+        ]
+      }
+    ];
+
+    // 2. APPLICATION STATE
+    const STORAGE_KEY = 'umall_connect_stalls_v1';
+    const USER_KEY = 'umall_connect_user_v1';
+
+    let state = {
+      stalls: [],
+      user: null,         // { name, email, role: 'consumer' | 'seller' | null, isGuestOffline: boolean }
+      isOffline: false,
+      onlyAvailable: false,
+      selectedSellerStallId: 'stall-1',
+      authMode: 'signin'
+    };
+
+    // 3. INITIALIZATION
+    function initApp() {
+      // Load stalls from localStorage or seed defaults
+      const savedStalls = localStorage.getItem(STORAGE_KEY);
+      if (savedStalls) {
+        try {
+          state.stalls = JSON.parse(savedStalls);
+        } catch (e) {
+          state.stalls = JSON.parse(JSON.stringify(DEFAULT_STALLS));
+        }
+      } else {
+        state.stalls = JSON.parse(JSON.stringify(DEFAULT_STALLS));
+        saveStalls();
+      }
+
+      // Detect actual browser offline status
+      if (!navigator.onLine) {
+        state.isOffline = true;
+      }
+
+      window.addEventListener('online', () => {
+        state.isOffline = false;
+        showToast('Back online! Live stock indicators restored.', 'success');
+        updateUI();
+      });
+
+      window.addEventListener('offline', () => {
+        state.isOffline = true;
+        showToast('Connection lost. Switched to Offline Directory Mode.', 'warning');
+        updateUI();
+      });
+
+      // Restore user session if present
+      const savedUser = localStorage.getItem(USER_KEY);
+      if (savedUser) {
+        try {
+          state.user = JSON.parse(savedUser);
+        } catch (e) {
+          state.user = null;
+        }
+      }
+
+      lucide.createIcons();
+      updateUI();
+    }
+
+    function saveStalls() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.stalls));
+    }
+
+    function saveUser() {
+      if (state.user) {
+        localStorage.setItem(USER_KEY, JSON.stringify(state.user));
+      } else {
+        localStorage.removeItem(USER_KEY);
+      }
+    }
+
+    // 4. AUTHENTICATION & NAVIGATION HANDLERS
+    function switchAuthTab(mode) {
+      state.authMode = mode;
+      const tabSignin = document.getElementById('tab-signin');
+      const tabSignup = document.getElementById('tab-signup');
+      const submitBtn = document.getElementById('auth-submit-btn');
+
+      if (mode === 'signin') {
+        tabSignin.className = 'py-2 rounded-lg bg-white text-emerald-950 shadow-sm transition cursor-pointer';
+        tabSignup.className = 'py-2 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer';
+        submitBtn.querySelector('span').textContent = 'Sign In to UMall';
+      } else {
+        tabSignup.className = 'py-2 rounded-lg bg-white text-emerald-950 shadow-sm transition cursor-pointer';
+        tabSignin.className = 'py-2 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer';
+        submitBtn.querySelector('span').textContent = 'Create Account & Continue';
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('auth-name').value.trim();
+      const emailInput = document.getElementById('auth-email').value.trim();
+
+      state.user = {
+        name: nameInput || 'UMall Student',
+        email: emailInput || 'student@umall.edu.ph',
+        role: null,
+        isGuestOffline: false
+      };
+      saveUser();
+      showToast(`Welcome, ${state.user.name}! Select your role.`, 'success');
+      updateUI();
+    }
+
+    function quickDemoLogin() {
+      state.user = {
+        name: 'Maria Santos (Demo)',
+        email: 'maria.santos@university.edu.ph',
+        role: null,
+        isGuestOffline: false
+      };
+      state.isOffline = false;
+      saveUser();
+      showToast('Signed in with Demo Account!', 'success');
+      updateUI();
+    }
+
+    function enterOfflineGuestMode() {
+      state.isOffline = true;
+      state.user = {
+        name: 'Offline Visitor',
+        email: '',
+        role: 'consumer',
+        isGuestOffline: true
+      };
+      saveUser();
+      showToast('Offline Mode: Showing Stall Names, Menus & Locations.', 'warning');
+      updateUI();
+    }
+
+    function selectRole(role) {
+      if (!state.user) return;
+      if (state.isOffline && role === 'seller') {
+        showToast('Seller dashboard requires an Online connection. Switch Online first.', 'warning');
+        return;
+      }
+      state.user.role = role;
+      saveUser();
+      updateUI();
+    }
+
+    function goToRoleSelection() {
+      if (state.isOffline) {
+        showToast('Role switching is disabled in Offline Mode.', 'warning');
+        return;
+      }
+      if (state.user) {
+        state.user.role = null;
+        saveUser();
+        updateUI();
+      }
+    }
+
+    function handleHeaderBrandClick() {
+      if (!state.user) return;
+      if (state.isOffline) {
+        state.user.role = 'consumer';
+      } else {
+        state.user.role = null;
+      }
+      saveUser();
+      updateUI();
+    }
+
+    function toggleNetworkMode() {
+      state.isOffline = !state.isOffline;
+
+      if (state.isOffline) {
+        // When switching to offline, automatically show Consumer offline directory
+        if (!state.user) {
+          state.user = { name: 'Offline Visitor', email: '', role: 'consumer', isGuestOffline: true };
+        } else {
+          state.user.role = 'consumer';
+        }
+        showToast('Switched to Offline Mode — Live stock hidden.', 'warning');
+      } else {
+        // Back online
+        if (state.user && state.user.isGuestOffline) {
+          state.user.role = null; // Let guest pick Seller or Consumer now that they are online
+        }
+        showToast('Online Mode Active — Live stock indicators enabled.', 'success');
+      }
+      saveUser();
+      updateUI();
+    }
+
+    function logout() {
+      state.user = null;
+      state.isOffline = false;
+      saveUser();
+      showToast('Signed out successfully.', 'info');
+      updateUI();
+    }
+
+    // 5. MASTER UI ROUTER & RENDERER
+    function updateUI() {
+      const header = document.getElementById('app-header');
+      const offlineBanner = document.getElementById('offline-banner');
+      const viewLogin = document.getElementById('view-login');
+      const viewRoleSelect = document.getElementById('view-role-select');
+      const viewConsumer = document.getElementById('view-consumer');
+      const viewSeller = document.getElementById('view-seller');
+
+      // Hide all views initially
+      [viewLogin, viewRoleSelect, viewConsumer, viewSeller].forEach(v => v.classList.add('hidden'));
+
+      // Update Network Pill in Header
+      const netBtn = document.getElementById('network-toggle-btn');
+      const netDot = document.getElementById('network-dot');
+      const netLabel = document.getElementById('network-label');
+
+      if (state.isOffline) {
+        offlineBanner.classList.remove('hidden');
+        netBtn.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border border-amber-400 bg-amber-500 text-emerald-950 shadow-sm cursor-pointer';
+        netDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-950';
+        netLabel.textContent = 'Offline';
+      } else {
+        offlineBanner.classList.add('hidden');
+        netBtn.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border border-emerald-700 bg-emerald-900/90 text-emerald-100 hover:bg-emerald-800 shadow-sm cursor-pointer';
+        netDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+        netLabel.textContent = 'Online';
+      }
+
+      // If not logged in -> Show Login Screen
+      if (!state.user) {
+        header.classList.add('hidden');
+        viewLogin.classList.remove('hidden');
+        lucide.createIcons();
+        return;
+      }
+
+      // User is logged in -> Show Header
+      header.classList.remove('hidden');
+      document.getElementById('header-username').textContent = state.user.name;
+
+      const switchRoleBtn = document.getElementById('switch-role-btn');
+      const currentRoleLabel = document.getElementById('current-role-label');
+
+      if (state.isOffline) {
+        switchRoleBtn.classList.add('hidden');
+      } else {
+        switchRoleBtn.classList.remove('hidden');
+        currentRoleLabel.textContent = state.user.role
+          ? `Role: ${state.user.role === 'seller' ? 'Seller' : 'Consumer'}`
+          : 'Choose Role';
+      }
+
+      // Route based on Role
+      if (!state.user.role && !state.isOffline) {
+        document.getElementById('role-welcome-name').textContent = state.user.name;
+        viewRoleSelect.classList.remove('hidden');
+      } else if (state.user.role === 'seller' && !state.isOffline) {
+        viewSeller.classList.remove('hidden');
+        renderSellerDashboard();
+      } else {
+        viewConsumer.classList.remove('hidden');
+        renderConsumerView();
+      }
+
+      lucide.createIcons();
+    }
+
+    // 6. CONSUMER VIEW LOGIC (ONLINE + OFFLINE)
+    function toggleOnlyAvailableFilter() {
+      if (state.isOffline) return;
+      state.onlyAvailable = !state.onlyAvailable;
+      const btn = document.getElementById('only-available-btn');
+      const dot = document.getElementById('only-available-dot');
+
+      if (state.onlyAvailable) {
+        btn.className = 'w-full h-full py-3 px-4 rounded-2xl border border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+      } else {
+        btn.className = 'w-full h-full py-3 px-4 rounded-2xl border border-slate-300 bg-white hover:bg-emerald-50 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer';
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300';
+      }
+      renderConsumerStalls();
+    }
+
+    function clearConsumerSearch() {
+      document.getElementById('consumer-search').value = '';
+      document.getElementById('consumer-category-filter').value = 'all';
+      state.onlyAvailable = false;
+      const btn = document.getElementById('only-available-btn');
+      const dot = document.getElementById('only-available-dot');
+      btn.className = 'w-full h-full py-3 px-4 rounded-2xl border border-slate-300 bg-white hover:bg-emerald-50 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300';
+      renderConsumerStalls();
+    }
+
+    function renderConsumerView() {
+      const legend = document.getElementById('consumer-legend');
+      const availFilterWrap = document.getElementById('availability-filter-wrapper');
+      const subtitle = document.getElementById('consumer-subtitle');
+
+      if (state.isOffline) {
+        legend.classList.add('hidden');
+        availFilterWrap.classList.add('hidden');
+        subtitle.textContent = 'Offline Directory: Viewing Stall Names, Menus & Locations inside UMall.';
+      } else {
+        legend.classList.remove('hidden');
+        availFilterWrap.classList.remove('hidden');
+        subtitle.textContent = 'Check real-time stock across food stalls, 2nd floor uniforms, and printing shops.';
+      }
+
+      renderConsumerStalls();
+    }
+
+    function renderConsumerStalls() {
+      const grid = document.getElementById('consumer-stalls-grid');
+      const emptyState = document.getElementById('consumer-empty-state');
+      const searchInput = document.getElementById('consumer-search');
+      const clearBtn = document.getElementById('clear-search-btn');
+      const categoryFilter = document.getElementById('consumer-category-filter').value;
+
+      const query = searchInput.value.trim().toLowerCase();
+      if (query.length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      grid.innerHTML = '';
+      let visibleStallsCount = 0;
+
+      state.stalls.forEach(stall => {
+        if (categoryFilter !== 'all' && stall.category !== categoryFilter) {
+          return;
+        }
+
+        const stallMatchesQuery =
+          stall.name.toLowerCase().includes(query) ||
+          stall.location.toLowerCase().includes(query) ||
+          stall.category.toLowerCase().includes(query);
+
+        // Filter products inside this stall
+        const filteredProducts = stall.products.filter(prod => {
+          if (!state.isOffline && state.onlyAvailable && !prod.available) {
+            return false;
+          }
+          if (!query || stallMatchesQuery) {
+            return true;
+          }
+          return (
+            prod.name.toLowerCase().includes(query) ||
+            (prod.note && prod.note.toLowerCase().includes(query))
+          );
+        });
+
+        if (filteredProducts.length === 0 && !stallMatchesQuery) {
+          return;
+        }
+
+        visibleStallsCount++;
+
+        // Build product rows HTML
+        const productsHtml = filteredProducts.length > 0
+          ? filteredProducts.map(prod => {
+              // OFFLINE MODE: Only show item name & price (NO green/red stock status indicator)
+              if (state.isOffline) {
+                return `
+                  <div class="py-3 px-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-3">
+                    <div>
+                      <p class="text-sm font-semibold text-slate-900">${escapeHtml(prod.name)}</p>
+                      ${prod.note ? `<p class="text-xs text-slate-500 mt-0.5">${escapeHtml(prod.note)}</p>` : ''}
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 shrink-0">₱${Number(prod.price).toFixed(2).replace(/\.00$/, '')}</span>
+                  </div>
+                `;
+              }
+
+              // ONLINE MODE: Show Green (Available) or Red (Out of Stock) indicator
+              const statusBadge = prod.available
+                ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                     Available
+                   </span>`
+                : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-800 border border-red-200 shrink-0">
+                     <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                     Out of Stock
+                   </span>`;
+
+              const rowBg = prod.available
+                ? 'bg-white border-slate-200 hover:border-emerald-300'
+                : 'bg-red-50/30 border-red-100 opacity-85';
+
+              return `
+                <div class="py-3 px-3.5 rounded-2xl border ${rowBg} flex items-center justify-between gap-3 transition">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full shrink-0 ${prod.available ? 'bg-emerald-500' : 'bg-red-500'}"></span>
+                      <p class="text-sm font-semibold text-slate-900 truncate">${escapeHtml(prod.name)}</p>
+                    </div>
+                    ${prod.note ? `<p class="text-xs text-slate-500 mt-0.5 pl-4.5">${escapeHtml(prod.note)}</p>` : ''}
+                  </div>
+                  <div class="flex items-center gap-2.5 shrink-0">
+                    <span class="text-sm font-extrabold text-slate-800">₱${Number(prod.price).toFixed(2).replace(/\.00$/, '')}</span>
+                    ${statusBadge}
+                  </div>
+                </div>
+              `;
+            }).join('')
+          : `<p class="text-xs text-slate-400 italic py-4 text-center">No items listed under current filter.</p>`;
+
+        // Stall Card
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/90 hover:shadow-md transition flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <!-- Stall Header: Name & Location -->
+            <div class="flex items-start justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+              <div>
+                <span class="inline-block px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 text-[11px] font-bold mb-1.5 border border-emerald-100">
+                  ${escapeHtml(stall.category)}
+                </span>
+                <h2 class="text-lg font-extrabold text-slate-900 leading-snug">${escapeHtml(stall.name)}</h2>
+                <p class="text-xs font-semibold text-amber-700 mt-1.5 flex items-center gap-1.5">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+                  <span>${escapeHtml(stall.location)}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Menu / Product List -->
+            <div>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Menu &amp; Items (${filteredProducts.length})</span>
+              </div>
+              <div class="space-y-2.5">
+                ${productsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      if (visibleStallsCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    // 7. SELLER DASHBOARD LOGIC
+    function renderSellerDashboard() {
+      const select = document.getElementById('seller-stall-select');
+      select.innerHTML = state.stalls.map(s =>
+        `<option value="${s.id}" ${s.id === state.selectedSellerStallId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`
+      ).join('');
+
+      const activeStall = state.stalls.find(s => s.id === state.selectedSellerStallId) || state.stalls[0];
+      if (!activeStall) return;
+      state.selectedSellerStallId = activeStall.id;
+
+      // Update Stall Card Info
+      document.getElementById('seller-stall-category-badge').textContent = activeStall.category;
+      document.getElementById('seller-stall-title').textContent = activeStall.name;
+      document.getElementById('seller-stall-location-text').textContent = activeStall.location;
+
+      const availableCount = activeStall.products.filter(p => p.available).length;
+      const unavailableCount = activeStall.products.length - availableCount;
+      document.getElementById('seller-stat-available').textContent = availableCount;
+      document.getElementById('seller-stat-unavailable').textContent = unavailableCount;
+
+      // Render Products List with One-Click Availability Toggle
+      const listContainer = document.getElementById('seller-products-list');
+      if (activeStall.products.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+            <p class="text-sm font-semibold text-slate-600">No items added to this stall yet.</p>
+            <p class="text-xs text-slate-400 mt-1">Use the form on the left to add products or services.</p>
+          </div>
+        `;
+      } else {
+        listContainer.innerHTML = activeStall.products.map(prod => `
+          <div class="p-4 rounded-2xl border ${prod.available ? 'border-slate-200 bg-white' : 'border-red-200 bg-red-50/40'} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full shrink-0 ${prod.available ? 'bg-emerald-500' : 'bg-red-500'}"></span>
+                <h4 class="text-sm font-bold text-slate-900 truncate">${escapeHtml(prod.name)}</h4>
+                <span class="text-xs font-extrabold text-emerald-900 bg-emerald-100/80 px-2 py-0.5 rounded-lg">
+                  ₱${Number(prod.price).toFixed(2).replace(/\.00$/, '')}
+                </span>
+              </div>
+              ${prod.note ? `<p class="text-xs text-slate-500 mt-1 pl-5">${escapeHtml(prod.note)}</p>` : ''}
+            </div>
+
+            <div class="flex items-center justify-end gap-2 shrink-0">
+              <!-- One-Click Stock Toggle Button -->
+              <button
+                onclick="toggleProductStock('${activeStall.id}', '${prod.id}')"
+                class="px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer ${
+                  prod.available
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                }"
+                title="Click to toggle stock status"
+              >
+                <i data-lucide="${prod.available ? 'check-circle' : 'x-circle'}" class="w-3.5 h-3.5"></i>
+                <span>${prod.available ? 'Available (In Stock)' : 'Out of Stock'}</span>
+              </button>
+
+              <!-- Delete Item Button -->
+              <button
+                onclick="deleteProduct('${activeStall.id}', '${prod.id}')"
+                class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                title="Remove item"
+              >
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    function handleSellerStallChange() {
+      state.selectedSellerStallId = document.getElementById('seller-stall-select').value;
+      document.getElementById('edit-location-box').classList.add('hidden');
+      renderSellerDashboard();
+    }
+
+    function toggleNewStallForm() {
+      document.getElementById('new-stall-panel').classList.toggle('hidden');
+    }
+
+    function handleAddStall(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-stall-name').value.trim();
+      const location = document.getElementById('new-stall-location').value.trim();
+      const category = document.getElementById('new-stall-category').value;
+
+      if (!name || !location) return;
+
+      const newStall = {
+        id: 'stall-' + Date.now(),
+        name,
+        location,
+        category,
+        products: []
+      };
+
+      state.stalls.push(newStall);
+      state.selectedSellerStallId = newStall.id;
+      saveStalls();
+
+      document.getElementById('new-stall-name').value = '';
+      document.getElementById('new-stall-location').value = '';
+      document.getElementById('new-stall-panel').classList.add('hidden');
+
+      showToast(`Created stall "${name}"!`, 'success');
+      renderSellerDashboard();
+    }
+
+    function editCurrentStallLocation() {
+      const activeStall = state.stalls.find(s => s.id === state.selectedSellerStallId);
+      if (!activeStall) return;
+      const box = document.getElementById('edit-location-box');
+      const input = document.getElementById('edit-location-input');
+      input.value = activeStall.location;
+      box.classList.toggle('hidden');
+    }
+
+    function saveStallLocation() {
+      const activeStall = state.stalls.find(s => s.id === state.selectedSellerStallId);
+      const newLoc = document.getElementById('edit-location-input').value.trim();
+      if (activeStall && newLoc) {
+        activeStall.location = newLoc;
+        saveStalls();
+        document.getElementById('edit-location-box').classList.add('hidden');
+        showToast('Stall location updated!', 'success');
+        renderSellerDashboard();
+      }
+    }
+
+    function handleAddProduct(e) {
+      e.preventDefault();
+      const activeStall = state.stalls.find(s => s.id === state.selectedSellerStallId);
+      if (!activeStall) return;
+
+      const name = document.getElementById('prod-name').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const available = document.getElementById('prod-available').value === 'true';
+      const note = document.getElementById('prod-note').value.trim();
+
+      if (!name || isNaN(price)) return;
+
+      activeStall.products.unshift({
+        id: 'prod-' + Date.now(),
+        name,
+        price,
+        note,
+        available
+      });
+
+      saveStalls();
+      e.target.reset();
+      showToast(`Added "${name}" (${available ? 'Available' : 'Out of Stock'}).`, 'success');
+      renderSellerDashboard();
+    }
+
+    function toggleProductStock(stallId, prodId) {
+      const stall = state.stalls.find(s => s.id === stallId);
+      if (!stall) return;
+      const prod = stall.products.find(p => p.id === prodId);
+      if (!prod) return;
+
+      prod.available = !prod.available;
+      saveStalls();
+      showToast(
+        `${prod.name} marked as ${prod.available ? 'Available (Green)' : 'Out of Stock (Red)'}.`,
+        prod.available ? 'success' : 'warning'
+      );
+      renderSellerDashboard();
+    }
+
+    function deleteProduct(stallId, prodId) {
+      const stall = state.stalls.find(s => s.id === stallId);
+      if (!stall) return;
+      stall.products = stall.products.filter(p => p.id !== prodId);
+      saveStalls();
+      showToast('Item removed from stall menu.', 'info');
+      renderSellerDashboard();
+    }
+
+    // 8. UTILITIES
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const colors = {
+        success: 'bg-emerald-900 text-white border-emerald-700',
+        warning: 'bg-amber-500 text-emerald-950 border-amber-600',
+        info: 'bg-slate-900 text-white border-slate-700'
+      };
+
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg border text-xs font-bold flex items-center gap-2 transition-all transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Boot application on DOM load
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
